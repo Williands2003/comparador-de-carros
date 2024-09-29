@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparação de Veículos: Compra Tradicional x Assinatura</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e9f7ef;
+      color: #333;
+    }
+    header {
+      background-color: #28a745;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .car-card {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.3s;
+    }
+    .car-card img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+    .car-card:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .comparison-section {
+      margin-top: 20px;
+    }
+    .comparison-details {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .comparison-result h3 {
+      color: #28a745;
+    }
+    .subscription-options label {
+      margin-right: 10px;
+    }
+    .filter-section {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Comparação de Veículos: Compra Tradicional x Assinatura</h1>
+  </header>
+
+  <!-- Seção de filtragem -->
+  <div class="container filter-section">
+    <h3>Filtrar por Categoria:</h3>
+    <select id="category-filter" class="form-select" onchange="filterCars()">
+      <option value="all">Todos</option>
+      <option value="economico">Econômico</option>
+      <option value="intermediario">Intermediário</option>
+      <option value="utilitario">Utilitário</option>
+      <option value="suv">SUV</option>
+      <option value="executivo">Executivo</option>
+      <option value="premium">Premium</option>
+    </select>
+  </div>
+
+  <!-- Seção de seleção de carros -->
+  <div class="container">
+    <div class="row car-selection mt-4" id="car-list">
+      <!-- Carros cadastrados -->
+      <!-- Carros serão gerados dinamicamente -->
+    </div>
+
+    <!-- Seção de comparação -->
+    <div id="comparison-section" class="comparison-section"></div>
+  </div>
+
+  <script>
+    const cars = [
+      {
+        name: "Carro A",
+        price: 80000,
+        maintenance: 3000,
+        ipva: 2400,
+        depreciation: 8000,
+        insurance: 2000,
+        category: "economico",
+        image: "carroA.jpg",
+      },
+      {
+        name: "Carro B",
+        price: 90000,
+        maintenance: 3500,
+        ipva: 2700,
+        depreciation: 9000,
+        insurance: 2500,
+        category: "intermediario",
+        image: "carroB.jpg",
+      },
+      {
+        name: "Carro C",
+        price: 120000,
+        maintenance: 4000,
+        ipva: 3600,
+        depreciation: 12000,
+        insurance: 3000,
+        category: "suv",
+        image: "carroC.jpg",
+      },
+      {
+        name: "Carro D",
+        price: 150000,
+        maintenance: 4500,
+        ipva: 4000,
+        depreciation: 15000,
+        insurance: 3500,
+        category: "premium",
+        image: "carroD.jpg",
+      },
+    ];
+
+    // Filtrar carros por categoria
+    function filterCars() {
+      const category = document.getElementById("category-filter").value;
+      const carList = document.getElementById("car-list");
+      carList.innerHTML = "";
+
+      const filteredCars = cars.filter(
+        (car) => category === "all" || car.category === category
+      );
+
+      filteredCars.forEach((car, index) => {
+        carList.innerHTML += `
+          <div class="col-md-3">
+            <div class="car-card" onclick="selectCar(${index})">
+              <img src="${car.image}" alt="${car.name}">
+              <h3>${car.name}</h3>
+              <p>Preço Base: R$ ${car.price.toLocaleString("pt-BR")}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Função para selecionar carro
+    function selectCar(index) {
+      const car = cars[index];
+      const comparisonSection = document.getElementById("comparison-section");
+      comparisonSection.innerHTML = `
+        <div class="comparison-details mt-4">
+          <h2>${car.name}</h2>
+          <div class="subscription-options mb-4">
+            <label for="months">Escolha o período de assinatura:</label>
+            <select id="months" onchange="updateComparison(${index})">
+              <option value="24">24 meses</option>
+              <option value="36">36 meses</option>
+              <option value="48" selected>48 meses</option>
+            </select>
+          </div>
+          <div class="comparison-result">
+            <h3>Compra Tradicional</h3>
+            <p>Preço Base: R$ ${car.price.toLocaleString("pt-BR")}</p>
+            <p>Manutenção Estimada: R$ ${car.maintenance.toLocaleString("pt-BR")} / ano</p>
+            <p>Seguro Estimado: R$ ${car.insurance.toLocaleString("pt-BR")} / ano</p>
+            <p>IPVA Anual: R$ ${car.ipva.toLocaleString("pt-BR")}</p>
+            <p id="traditional-total">Custo Total em 48 meses: R$ ${
+              calculateTraditionalTotal(car, 48).toLocaleString("pt-BR")
+            }</p>
+          </div>
+          <div class="comparison-result mt-4">
+            <h3>Carro por Assinatura</h3>
+            <p>Assinatura Mensal: R$ 2.000</p>
+            <p id="subscription-total">Custo Total em 48 meses: R$ ${(
+              2000 * 48
+            ).toLocaleString("pt-BR")}</p>
+            <p id="savings">Você economiza: R$ ${
+              car.price - 2000 * 48 > 0 ? (car.price - 2000 * 48).toLocaleString("pt-BR") : "0"
+            }</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Atualiza os valores da comparação quando o usuário altera os meses
+    function updateComparison(index) {
+      const months = document.getElementById("months").value;
+      const car = cars[index];
+      const traditionalTotal = calculateTraditionalTotal(car, months);
+      const subscriptionTotal = calculateSubscriptionTotal(2000, months);
+      const savings = car.price - subscriptionTotal > 0 ? car.price - subscriptionTotal : 0;
+
+      document.getElementById(
+        "traditional-total"
+      ).innerText = `Custo Total em ${months} meses: R$ ${traditionalTotal.toLocaleString(
+        "pt-BR"
+      )}`;
+      document.getElementById(
+        "subscription-total"
+      ).innerText = `Custo Total em ${months} meses: R$ ${subscriptionTotal.toLocaleString(
+        "pt-BR"
+      )}`;
+      document.getElementById(
+        "savings"
+      ).innerText = `Você economiza: R$ ${savings.toLocaleString("pt-BR")}`;
+    }
+
+    function calculateTraditionalTotal(car, months) {
+      const years = months / 12;
+      return (
+        car.price +
+        (car.maintenance + car.ipva + car.insurance + car.depreciation) * years
+      );
+    }
+
+    function calculateSubscriptionTotal(monthly, months) {
+      return monthly * months;
+    }
+
+    // Inicializa a lista de carros na primeira carga da página
+    window.onload = function () {
+      filterCars();
+    };
+  </script>
+</body>
+</html>
